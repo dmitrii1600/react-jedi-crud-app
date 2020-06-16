@@ -1,47 +1,39 @@
-import React, { useState } from 'react';
-import Table from "./components/common/Table";
-import Form from './components/common/Form'
-
-// import './App.css';
+import React from 'react';
+import {Route, BrowserRouter as Router, Switch, Redirect} from "react-router-dom";
+import Navbar from "./components/Navbar";
+import PeoplePage from "./components/pages/PeoplePage";
+import PlanetsPage from "./components/pages/PlanetsPage";
+import StarshipsPage from "./components/pages/StarshipsPage";
+import NotFound from "./components/pages/NotFound";
+import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
-const data = [
-    {first: 'Mark', last: 'Otto', handle: '@motto', id: '1'},
-    {first: 'Carl', last: 'Reno', handle: '@ceno', id: '2'},
-    {first: 'Steve', last: 'Smith', handle: '@ssteve', id: '3'}
-]
-
-const columns = Object.keys(data[0]);
 
 function App() {
-    const [people, setPeople] = useState(data);
-    console.log(people);
-
-    const handleAppPerson = (personData) => {
-        const data = [...people, personData];
-        setPeople(data)
-    }
-
-    const getInitialPeopleData = () => {
-        return columns.reduce((cols, columnName) => {
-            cols[columnName] = "";
-            return cols;
-        }, {})
-    }
 
     return (
-        <div className="container">
-            <Table
-                data={people}
-                columns={columns}
-                tableDescriptor="People"
-            />
-            <Form
-                initialData={getInitialPeopleData()}
-                columns={columns}
-                onAddData={handleAppPerson}
-            />
-        </div>
+        <Router>
+            <div className="App">
+                <Navbar classes="navbar fixed-top navbar-expand-sm navbar-dark bg-dark"/>
+                <Switch>
+                    <Route exact path="/">
+                        <Redirect to="/people"/>
+                    </Route>
+                    <Route path="/people">
+                        <PeoplePage/>
+                    </Route>
+                    <Route path="/planets">
+                        <PlanetsPage/>
+                    </Route>
+                    <Route path="/starships">
+                        <StarshipsPage/>
+                    </Route>
+                    <Route path="*">
+                        <NotFound/>
+                    </Route>
+                </Switch>
+            </div>
+        </Router>
     );
 }
 
