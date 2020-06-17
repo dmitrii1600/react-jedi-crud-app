@@ -15,7 +15,7 @@ function Table({columns, data, tableDescriptor, onDeleteData}) {
             </thead>
             <tbody>
             {data.map((item, index) => (
-                <tr key={item.id}>
+                <tr key={index + item.name}>
                     <th scope="row">{++index}</th>
                     {columns.map(columnTitle => (
                         <td key={item[columnTitle] + columnTitle}>{item[columnTitle]}</td>

@@ -1,53 +1,90 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Table from "../common/Table";
 import Title from "../common/Title";
 import Form from "../common/Form";
+import {getPeople, getPlanets} from "../../services/swApiService";
+import {getFromLS, saveToLS} from "../../services/localStorageService";
 
-const data = [
-    {name: 'Anaxes', galaxy: 'E-5465', type: 'rocky', id: '1'},
-    {name: 'Abafar', galaxy: 'Z-23', type: 'desert', id: '2'},
-    {name: 'Aeos Prime', galaxy: 'F-234', type: 'ocean', id: '3'},
-];
-
-const columns = Object.keys(data[0]);
 
 function PlanetsPage() {
+    const storageKey = 'planets';
+    const [planets, setPlanets] = useState(getFromLS(storageKey) || []);
+    const [isLoading, setIsLoading] = useState(false);
 
-    const [planets, setPlanets] = useState(data);
+    useEffect(() => {
+        const getData = async () => {
+            setIsLoading(true);
+            const data = await getPlanets();
+            console.log("SERVERCALL");
+            console.log(data);
+            saveToLS(storageKey, data);
+            const storedData = getFromLS(storageKey);
+            setPlanets(storedData);
+            setIsLoading(false);
+        };
+
+        if (!localStorage.getItem(storageKey)) {
+            console.log("INNN");
+            saveToLS(storageKey, []);
+        }
+
+        if (!getFromLS(storageKey).length) {
+            getData();
+        } else {
+            const storedData = getFromLS(storageKey);
+            console.log("LS");
+            setPlanets(storedData);
+        }
+    }, []);
 
     const handleDeletePlanet = (id) => {
         const filteredData = planets.filter(item => item.id !== id);
-        setPlanets(filteredData);
+        saveToLS(storageKey, filteredData);
+        const storedData = getFromLS(storageKey);
+        setPlanets(storedData);
     };
 
     const handleAddPlanet = (planetData) => {
         const data = [...planets, planetData];
-        setPlanets(data);
+        saveToLS(storageKey, data);
+        const storedData = getFromLS(storageKey);
+        setPlanets(storedData);
     };
 
     const getInitialPlanetsData = () => {
+        const columns = getColumnNames();
         return columns.reduce((cols, columnName) => {
             cols[columnName] = "";
             return cols;
         }, {})
     };
 
+    const getColumnNames = () => {
+        if (!planets.length) {
+            return []
+        }
+
+        return Object.keys(planets[0])
+    };
+
     return (
         <div className="container pt-2 pb-2">
             <Title titleText="Planets from Starwars Universe"/>
             {
-                planets.length
-                    ? <Table
-                        data={planets}
-                        columns={columns}
-                        tableDescriptor="Planets"
-                        onDeleteData={handleDeletePlanet}
-                    />
-                    : <div style={{fontSize: 23}}><strong>There are no entries in the table</strong></div>
+                isLoading
+                    ? <div style={{fontSize: 23}}><strong>Loading...</strong></div>
+                    : planets.length
+                        ? <Table
+                            data={planets}
+                            columns={getColumnNames()}
+                            tableDescriptor="Planets"
+                            onDeleteData={handleDeletePlanet}
+                        />
+                        : <div style={{fontSize: 23}}><strong>There are no entries in the table</strong></div>
             }
             <Form
                 initialData={getInitialPlanetsData()}
-                columns={columns}
+                columns={getColumnNames()}
                 onAddData={handleAddPlanet}
             />
         </div>
