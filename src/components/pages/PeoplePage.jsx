@@ -75,12 +75,22 @@ function PeoplePage() {
             return []
         }
 
-        return Object.keys(people[0])
+        const keys = Object.keys(people[0]);
+        keys.pop();
+        return keys
     };
 
     return (
         <div className="container pt-2 pb-2">
             <Title titleText="People from Starwars Universe"/>
+
+            <Link to={"/people/new"}>
+                <Button
+                    type="submit"
+                    label="Create New"
+                    classes="btn btn-warning mt-2 mb-2"
+                />
+            </Link>
             {
                 isLoading
                     ? <div style={{fontSize: 23}}><strong>Loading...</strong></div>

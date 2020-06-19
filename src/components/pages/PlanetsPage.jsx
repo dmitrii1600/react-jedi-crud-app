@@ -4,6 +4,7 @@ import Title from "../common/Title";
 import Form from "../common/Form";
 import {getPeople, getPlanets} from "../../services/swApiService";
 import {getFromLS, saveToLS} from "../../services/localStorageService";
+import Button from "../common/Button";
 
 
 function PlanetsPage() {
@@ -64,12 +65,19 @@ function PlanetsPage() {
             return []
         }
 
-        return Object.keys(planets[0])
+        const keys = Object.keys(planets[0]);
+        keys.pop();
+        return keys
     };
 
     return (
         <div className="container pt-2 pb-2">
             <Title titleText="Planets from Starwars Universe"/>
+            <Button
+                type="submit"
+                label="Create New"
+                classes="btn btn-warning mt-2 mb-2"
+            />
             {
                 isLoading
                     ? <div style={{fontSize: 23}}><strong>Loading...</strong></div>
