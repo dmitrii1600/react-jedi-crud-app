@@ -1,32 +1,19 @@
-import React, {useEffect, useState} from 'react';
-import {
-    Switch,
-    Route,
-    Link,
-    useRouteMatch
-} from "react-router-dom";
+import React, {useEffect} from 'react';
+import {Link} from "react-router-dom";
 import Table from "../common/Table";
 import Title from "../common/Title";
-import Form from "../common/Form";
 import {getPeople} from "../../services/swApiService";
 import {getFromLS, saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
+import {Orbitals} from "react-spinners-css";
 
 
-function PeoplePage() {
-    const storageKey = 'people';
+function PeoplePage({people, setPeople, isLoading, setIsLoading, storageKey}) {
 
-    const {path, url} = useRouteMatch();
-
-    const [people, setPeople] = useState(getFromLS(storageKey) || []);
-    const [isLoading, setIsLoading] = useState(false);
-
-    useEffect( () => {
+    useEffect(() => {
         const getData = async () => {
             setIsLoading(true);
             const data = await getPeople();
-            console.log("SERVERCALL");
-            console.log(data);
             saveToLS(storageKey, data);
             const storedData = getFromLS(storageKey);
             setPeople(storedData);
@@ -34,16 +21,13 @@ function PeoplePage() {
         };
 
         if (!localStorage.getItem(storageKey)) {
-            console.log("INNN");
             saveToLS(storageKey, []);
         }
 
-        if (!getFromLS(storageKey).length){
+        if (!getFromLS(storageKey).length) {
             getData();
-        }
-        else {
+        } else {
             const storedData = getFromLS(storageKey);
-            console.log("LS");
             setPeople(storedData);
         }
     }, []);
@@ -55,29 +39,24 @@ function PeoplePage() {
         setPeople(storedData);
     };
 
-    const handleAddPerson = (personData) => {
-        const data = [...people, personData];
-        saveToLS(storageKey, data);
-        const storedData = getFromLS(storageKey);
-        setPeople(storedData);
-    };
-
-    const getInitialPeopleData = () => {
-        const columns = getColumnNames();
-        return columns.reduce((cols, columnName) => {
-            cols[columnName] = "";
-            return cols;
-        }, {})
-    };
-
     const getColumnNames = () => {
         if (!people.length) {
             return []
         }
 
         const keys = Object.keys(people[0]);
-        keys.pop();
-        return keys
+        //keys.pop(); // without id
+        return keys.map(colName => {
+            if (colName === 'name') {
+                return {
+                    colName,
+                    content: ({name, id}) => (
+                        <Link style={{color: '#f0ad4e'}} to={`/people/${id}`}>{name}</Link>
+                    )
+                }
+            }
+            return {colName}
+        })
     };
 
     return (
@@ -93,26 +72,16 @@ function PeoplePage() {
             </Link>
             {
                 isLoading
-                    ? <div style={{fontSize: 23}}><strong>Loading...</strong></div>
+                    ? <Orbitals color="#eb3434" className="Loader"/>
                     : people.length
-                        ? <Table
-                            data={people}
-                            columns={getColumnNames()}
-                            tableDescriptor="People"
-                            onDeleteData={handleDeletePerson}
-                        />
-                        : <div style={{fontSize: 23}}><strong>There are no entries in the table</strong></div>
+                    ? <Table
+                        data={people}
+                        columns={getColumnNames()}
+                        tableDescriptor="People"
+                        onDeleteData={handleDeletePerson}
+                    />
+                    : <div style={{fontSize: 23}}><strong>There are no entries in the table :(</strong></div>
             }
-            <Switch>
-                <Route exact path="/">
-
-                </Route>
-            </Switch>
-            <Form
-                initialData={getInitialPeopleData()}
-                columns={getColumnNames()}
-                onAddData={handleAddPerson}
-            />
         </div>
     );
 }

@@ -1,8 +1,13 @@
 .App {
-  color: white;
-  background: url("assets/img/space-bg.jpg") 0 0/100% auto repeat;
-  min-height: 100vh;
-  margin-top: 50px;
+    color: white;
+    background: url("assets/img/space-bg.jpg") 0 0/100% auto repeat;
+    min-height: 100vh;
+    margin-top: 50px;
+}
+
+.Loader {
+    margin: 150px auto 0 auto;
+    display: block;
 }
 
 

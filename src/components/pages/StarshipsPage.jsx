@@ -1,23 +1,19 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect} from 'react';
 import Table from "../common/Table";
 import Title from "../common/Title";
-import Form from "../common/Form";
-import {getPlanets, getStarships} from "../../services/swApiService";
+import {getStarships} from "../../services/swApiService";
 import {getFromLS, saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
+import {Link} from "react-router-dom";
+import {Orbitals} from "react-spinners-css";
 
 
-function StarshipsPage() {
-    const storageKey = 'starships';
-    const [starships, setStarships] = useState(getFromLS(storageKey) || []);
-    const [isLoading, setIsLoading] = useState(false);
+function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storageKey}) {
 
     useEffect(() => {
         const getData = async () => {
             setIsLoading(true);
             const data = await getStarships();
-            console.log("SERVERCALL");
-            console.log(data);
             saveToLS(storageKey, data);
             const storedData = getFromLS(storageKey);
             setStarships(storedData);
@@ -25,17 +21,13 @@ function StarshipsPage() {
         };
 
         if (!localStorage.getItem(storageKey)) {
-            console.log("INNN");
             saveToLS(storageKey, []);
         }
 
         if (!getFromLS(storageKey).length) {
-           // setIsLoading(true);
             getData();
-          //  setIsLoading(false);
         } else {
             const storedData = getFromLS(storageKey);
-            console.log("LS");
             setStarships(storedData);
         }
     }, []);
@@ -47,56 +39,49 @@ function StarshipsPage() {
         setStarships(storedData);
     };
 
-    const handleAddStarship = (starshipData) => {
-        const data = [...starships, starshipData];
-        saveToLS(storageKey, data);
-        const storedData = getFromLS(storageKey);
-        setStarships(storedData);
-    };
-
-    const getInitialStarshipsData = () => {
-        const columns = getColumnNames();
-        return columns.reduce((cols, columnName) => {
-            cols[columnName] = "";
-            return cols;
-        }, {})
-    };
-
     const getColumnNames = () => {
         if (!starships.length) {
             return []
         }
 
         const keys = Object.keys(starships[0]);
-        keys.pop();
-        return keys
+        // keys.pop();
+        return keys.map(colName => {
+            if (colName === 'name') {
+                return {
+                    colName,
+                    content: ({name, id}) => (
+                        <Link style={{color: '#f0ad4e'}} to={`/starships/${id}`}>{name}</Link>
+                    )
+                }
+            }
+            return {colName}
+        })
     };
 
     return (
         <div className="container pt-2 pb-2">
             <Title titleText="Starships from Starwars Universe"/>
-            <Button
-                type="submit"
-                label="Create New"
-                classes="btn btn-warning mt-2 mb-2"
-            />
+
+            <Link to={"/starships/new"}>
+                <Button
+                    type="submit"
+                    label="Create New"
+                    classes="btn btn-warning mt-2 mb-2"
+                />
+            </Link>
             {
                 isLoading
-                    ? <div style={{fontSize: 23}}><strong>Loading...</strong></div>
+                    ? <Orbitals color="#eb3434" className="Loader"/>
                     : starships.length
-                        ? <Table
-                            data={starships}
-                            columns={getColumnNames()}
-                            tableDescriptor="Starships"
-                            onDeleteData={handleDeleteStarship}
-                        />
-                        : <div style={{fontSize: 23}}><strong>There are no entries in the table</strong></div>
+                    ? <Table
+                        data={starships}
+                        columns={getColumnNames()}
+                        tableDescriptor="Starships"
+                        onDeleteData={handleDeleteStarship}
+                    />
+                    : <div style={{fontSize: 23}}><strong>There are no entries in the table :(</strong></div>
             }
-            <Form
-                initialData={getInitialStarshipsData()}
-                columns={getColumnNames()}
-                onAddData={handleAddStarship}
-            />
         </div>
     );
 }
