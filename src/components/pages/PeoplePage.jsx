@@ -1,55 +1,87 @@
-import React, {useState} from 'react';
+import React, {useEffect} from 'react';
+import {Link} from "react-router-dom";
 import Table from "../common/Table";
 import Title from "../common/Title";
-import Form from "../common/Form";
+import {getPeople} from "../../services/swApiService";
+import {getFromLS, saveToLS} from "../../services/localStorageService";
+import Button from "../common/Button";
+import {Orbitals} from "react-spinners-css";
 
-const data = [
-    {first: 'Mark', last: 'Otto', handle: '@motto', id: '1'},
-    {first: 'Carl', last: 'Reno', handle: '@ceno', id: '2'},
-    {first: 'Steve', last: 'Smith', handle: '@ssteve', id: '3'}
-];
 
-const columns = Object.keys(data[0]);
+function PeoplePage({people, setPeople, isLoading, setIsLoading, storageKey}) {
 
-function PeoplePage() {
+    useEffect(() => {
+        const getData = async () => {
+            setIsLoading(true);
+            const data = await getPeople();
+            saveToLS(storageKey, data);
+            const storedData = getFromLS(storageKey);
+            setPeople(storedData);
+            setIsLoading(false);
+        };
 
-    const [people, setPeople] = useState(data);
+        if (!localStorage.getItem(storageKey)) {
+            saveToLS(storageKey, []);
+        }
+
+        if (!getFromLS(storageKey).length) {
+            getData();
+        } else {
+            const storedData = getFromLS(storageKey);
+            setPeople(storedData);
+        }
+    }, []);
 
     const handleDeletePerson = (id) => {
         const filteredData = people.filter(item => item.id !== id);
-        setPeople(filteredData);
+        saveToLS(storageKey, filteredData);
+        const storedData = getFromLS(storageKey);
+        setPeople(storedData);
     };
 
-    const handleAddPerson = (personData) => {
-        const data = [...people, personData];
-        setPeople(data);
-    };
+    const getColumnNames = () => {
+        if (!people.length) {
+            return []
+        }
 
-    const getInitialPeopleData = () => {
-        return columns.reduce((cols, columnName) => {
-            cols[columnName] = "";
-            return cols;
-        }, {})
+        const keys = Object.keys(people[0]);
+        //keys.pop(); // without id
+        return keys.map(colName => {
+            if (colName === 'name') {
+                return {
+                    colName,
+                    content: ({name, id}) => (
+                        <Link style={{color: '#f0ad4e'}} to={`/people/${id}`}>{name}</Link>
+                    )
+                }
+            }
+            return {colName}
+        })
     };
 
     return (
         <div className="container pt-2 pb-2">
             <Title titleText="People from Starwars Universe"/>
+
+            <Link to={"/people/new"}>
+                <Button
+                    type="submit"
+                    label="Create New"
+                    classes="btn btn-warning mt-2 mb-2"
+                />
+            </Link>
             {
-                people.length
+                isLoading
+                    ? <Orbitals color="#eb3434" className="Loader"/>
+                    : people.length
                     ? <Table
                         data={people}
-                        columns={columns}
+                        columns={getColumnNames()}
                         tableDescriptor="People"
                         onDeleteData={handleDeletePerson}
                     />
-                    : <div style={{fontSize: 23}}><strong>There are no entries in the table</strong></div>
+                    : <div style={{fontSize: 23}}><strong>There are no entries in the table :(</strong></div>
             }
-            <Form
-                initialData={getInitialPeopleData()}
-                columns={columns}
-                onAddData={handleAddPerson}
-            />
         </div>
     );
 }

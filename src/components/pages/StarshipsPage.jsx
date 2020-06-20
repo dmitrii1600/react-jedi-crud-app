@@ -1,55 +1,87 @@
-import React, {useState} from 'react';
+import React, {useEffect} from 'react';
 import Table from "../common/Table";
 import Title from "../common/Title";
-import Form from "../common/Form";
+import {getStarships} from "../../services/swApiService";
+import {getFromLS, saveToLS} from "../../services/localStorageService";
+import Button from "../common/Button";
+import {Link} from "react-router-dom";
+import {Orbitals} from "react-spinners-css";
 
-const data = [
-    {name: 'Azure Angel II', type: 'aethersprite-class', color: 'metal', id: '1'},
-    {name: 'Death Star', type: 'battle station', color: 'white', id: '2'},
-    {name: 'Ebon Hawk', type: 'fighter', color: 'black', id: '3'},
-];
 
-const columns = Object.keys(data[0]);
+function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storageKey}) {
 
-function StarshipsPage() {
+    useEffect(() => {
+        const getData = async () => {
+            setIsLoading(true);
+            const data = await getStarships();
+            saveToLS(storageKey, data);
+            const storedData = getFromLS(storageKey);
+            setStarships(storedData);
+            setIsLoading(false);
+        };
 
-    const [starships, setStarships] = useState(data);
+        if (!localStorage.getItem(storageKey)) {
+            saveToLS(storageKey, []);
+        }
+
+        if (!getFromLS(storageKey).length) {
+            getData();
+        } else {
+            const storedData = getFromLS(storageKey);
+            setStarships(storedData);
+        }
+    }, []);
 
     const handleDeleteStarship = (id) => {
         const filteredData = starships.filter(item => item.id !== id);
-        setStarships(filteredData);
+        saveToLS(storageKey, filteredData);
+        const storedData = getFromLS(storageKey);
+        setStarships(storedData);
     };
 
-    const handleAddStarship = (starshipData) => {
-        const data = [...starships, starshipData];
-        setStarships(data);
-    };
+    const getColumnNames = () => {
+        if (!starships.length) {
+            return []
+        }
 
-    const getInitialStarshipsData = () => {
-        return columns.reduce((cols, columnName) => {
-            cols[columnName] = "";
-            return cols;
-        }, {})
+        const keys = Object.keys(starships[0]);
+        // keys.pop();
+        return keys.map(colName => {
+            if (colName === 'name') {
+                return {
+                    colName,
+                    content: ({name, id}) => (
+                        <Link style={{color: '#f0ad4e'}} to={`/starships/${id}`}>{name}</Link>
+                    )
+                }
+            }
+            return {colName}
+        })
     };
 
     return (
         <div className="container pt-2 pb-2">
             <Title titleText="Starships from Starwars Universe"/>
+
+            <Link to={"/starships/new"}>
+                <Button
+                    type="submit"
+                    label="Create New"
+                    classes="btn btn-warning mt-2 mb-2"
+                />
+            </Link>
             {
-                starships.length
+                isLoading
+                    ? <Orbitals color="#eb3434" className="Loader"/>
+                    : starships.length
                     ? <Table
                         data={starships}
-                        columns={columns}
+                        columns={getColumnNames()}
                         tableDescriptor="Starships"
                         onDeleteData={handleDeleteStarship}
                     />
-                    : <div style={{fontSize: 23}}><strong>There are no entries in the table</strong></div>
+                    : <div style={{fontSize: 23}}><strong>There are no entries in the table :(</strong></div>
             }
-            <Form
-                initialData={getInitialStarshipsData()}
-                columns={columns}
-                onAddData={handleAddStarship}
-            />
         </div>
     );
 }
