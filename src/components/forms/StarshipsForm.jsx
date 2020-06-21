@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import shortid from "short-id"
 import {useForm} from "react-hook-form";
 import {starshipsColumns} from "../../services/swApiService";
-import {getFromLS, saveToLS} from "../../services/localStorageService";
+import {saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
 import Input from "../common/Input";
 
@@ -15,7 +15,7 @@ const initialStarshipsData = starshipsColumns.reduce((cols, columnName) => {
 }, {});
 
 
-const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
+const StarshipsForm = ({starships, setStarships, history, match, storageKey}) => {
 
     const [data, setData] = useState({...initialStarshipsData});
     const [editMode, setEditMode] = useState(false);
@@ -29,18 +29,18 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
         setEditMode(true);
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, starships);
+    }, [starships]);
+
     const onSubmit = () => {
 
         if (editMode) {
             const editedStarships = starships.map(person => person.id === data.id ? data : person);
-            saveToLS(storageKey, editedStarships);
-            const storedData = getFromLS(storageKey);
-            setStarships(storedData);
+            setStarships(editedStarships);
         } else {
             const newStarships = [...starships, {...data, id: shortid.generate()}];
-            saveToLS(storageKey, newStarships);
-            const storedData = getFromLS(storageKey);
-            setStarships(storedData);
+            setStarships(newStarships);
             setData({...initialStarshipsData});//clear form
         }
         history.push('/starships');
@@ -72,7 +72,7 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
                 <Button
                     type="submit"
                     label="Save"
-                    classes="btn btn-primary"
+                    classes="btn btn-success"
                 />
                 <Button
                     label="Back"
@@ -84,4 +84,4 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
     );
 };
 
-export default PeopleForm;
+export default StarshipsForm;

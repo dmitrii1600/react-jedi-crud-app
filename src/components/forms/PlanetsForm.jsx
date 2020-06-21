@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import shortid from "short-id"
 import {useForm} from "react-hook-form";
 import {planetsColumns} from "../../services/swApiService";
-import {getFromLS, saveToLS} from "../../services/localStorageService";
+import {saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
 import Input from "../common/Input";
 
@@ -29,18 +29,18 @@ const PlanetsForm = ({planets, setPlanets, history, match, storageKey}) => {
         setEditMode(true);
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, planets);
+    }, [planets]);
+
     const onSubmit = () => {
 
         if (editMode) {
             const editedPlanets = planets.map(person => person.id === data.id ? data : person);
-            saveToLS(storageKey, editedPlanets);
-            const storedData = getFromLS(storageKey);
-            setPlanets(storedData);
+            setPlanets(editedPlanets);
         } else {
             const newPeople = [...planets, {...data, id: shortid.generate()}];
-            saveToLS(storageKey, newPeople);
-            const storedData = getFromLS(storageKey);
-            setPlanets(storedData);
+            setPlanets(newPeople);
             setData({...initialPlanetsData});//clear form
         }
         history.push('/planets');
@@ -75,7 +75,7 @@ const PlanetsForm = ({planets, setPlanets, history, match, storageKey}) => {
                 <Button
                     type="submit"
                     label="Save"
-                    classes="btn btn-primary"
+                    classes="btn btn-success"
                 />
                 <Button
                     label="Back"
