@@ -18,7 +18,7 @@ function App() {
     const storageKeyPlanets = 'planets';
     const storageKeyStarships = 'starships';
 
-    const [people, setPeople] = useState([]);
+    //const [people, setPeople] = useState([]);
     const [planets, setPlanets] = useState([]);
     const [starships, setStarships] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -28,11 +28,9 @@ function App() {
             <Navbar classes="navbar fixed-top navbar-expand-sm navbar-dark bg-dark"/>
             <Switch>
                 <Route path="/people/:id" render={props =>
-                    <PeopleForm {...props} setPeople={setPeople} people={people} storageKey={storageKeyPeople}/>}/>
+                    <PeopleForm {...props} storageKey={storageKeyPeople}/>}/>
                 <Route exact path="/people" render={props =>
                     <PeoplePage {...props}
-                                setPeople={setPeople}
-                                people={people}
                                 storageKey={storageKeyPeople}
                                 isLoading={isLoading}
                                 setIsLoading={setIsLoading}/>}/>

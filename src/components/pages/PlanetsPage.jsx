@@ -32,6 +32,10 @@ function PlanetsPage({planets, setPlanets, isLoading, setIsLoading, storageKey})
         }
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, planets);
+    }, [planets]);
+
     const handleDeletePlanet = (id) => {
         const filteredData = planets.filter(item => item.id !== id);
         saveToLS(storageKey, filteredData);

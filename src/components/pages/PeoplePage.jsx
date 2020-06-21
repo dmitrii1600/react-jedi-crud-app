@@ -6,9 +6,14 @@ import {getPeople} from "../../services/swApiService";
 import {getFromLS, saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
 import {Orbitals} from "react-spinners-css";
+import {useDispatch, useSelector} from "react-redux";
+import {getAllPeople} from "../../store/selectors/people";
+import {deletePerson, setPeople} from "../../store/actions/people";
 
 
-function PeoplePage({people, setPeople, isLoading, setIsLoading, storageKey}) {
+function PeoplePage({isLoading, setIsLoading, storageKey}) {
+    const dispatch = useDispatch();
+    const people = useSelector(state => getAllPeople(state));
 
     useEffect(() => {
         const getData = async () => {
@@ -16,7 +21,8 @@ function PeoplePage({people, setPeople, isLoading, setIsLoading, storageKey}) {
             const data = await getPeople();
             saveToLS(storageKey, data);
             const storedData = getFromLS(storageKey);
-            setPeople(storedData);
+            //setPeople(storedData);
+            dispatch(setPeople(storedData));
             setIsLoading(false);
         };
 
@@ -28,15 +34,24 @@ function PeoplePage({people, setPeople, isLoading, setIsLoading, storageKey}) {
             getData();
         } else {
             const storedData = getFromLS(storageKey);
-            setPeople(storedData);
+            //setPeople(storedData);
+            dispatch(setPeople(storedData));
+            dispatch(deletePerson("111111"));
         }
     }, []);
 
     const handleDeletePerson = (id) => {
-        const filteredData = people.filter(item => item.id !== id);
-        saveToLS(storageKey, filteredData);
+        console.log(id);
+        //const filteredData = people.filter(item => item.id !== id);
+        dispatch(deletePerson(id));
+        //dispatch(setPeople(people));
+        console.log("PEOPLE", people);
+
+        saveToLS(storageKey, people);
         const storedData = getFromLS(storageKey);
-        setPeople(storedData);
+        console.log("LSPEOPLE", storedData);
+        //setPeople(storedData);
+       // dispatch(setPeople(storedData));
     };
 
     const getColumnNames = () => {
