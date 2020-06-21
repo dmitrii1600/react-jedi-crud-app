@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import shortid from "short-id"
 import {useForm} from "react-hook-form";
 import {peopleColumns} from "../../services/swApiService";
-import {getFromLS, saveToLS} from "../../services/localStorageService";
+import {saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
 import Input from "../common/Input";
 
@@ -29,18 +29,18 @@ const PeopleForm = ({people, setPeople, history, match, storageKey}) => {
         setEditMode(true);
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, people);
+    }, [people]);
+
     const onSubmit = () => {
 
         if (editMode) {
             const editedPeople = people.map(person => person.id === data.id ? data : person);
-            saveToLS(storageKey, editedPeople);
-            const storedData = getFromLS(storageKey);
-            setPeople(storedData);
+            setPeople(editedPeople);
         } else {
             const newPeople = [...people, {...data, id: shortid.generate()}];
-            saveToLS(storageKey, newPeople);
-            const storedData = getFromLS(storageKey);
-            setPeople(storedData);
+            setPeople(newPeople);
             setData({...initialPeopleData});//clear form
         }
         history.push('/people');

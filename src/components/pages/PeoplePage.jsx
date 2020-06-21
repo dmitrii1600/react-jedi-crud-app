@@ -14,9 +14,7 @@ function PeoplePage({people, setPeople, isLoading, setIsLoading, storageKey}) {
         const getData = async () => {
             setIsLoading(true);
             const data = await getPeople();
-            saveToLS(storageKey, data);
-            const storedData = getFromLS(storageKey);
-            setPeople(storedData);
+            setPeople(data);
             setIsLoading(false);
         };
 
@@ -32,11 +30,13 @@ function PeoplePage({people, setPeople, isLoading, setIsLoading, storageKey}) {
         }
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, people);
+    }, [people]);
+
     const handleDeletePerson = (id) => {
         const filteredData = people.filter(item => item.id !== id);
-        saveToLS(storageKey, filteredData);
-        const storedData = getFromLS(storageKey);
-        setPeople(storedData);
+        setPeople(filteredData);
     };
 
     const getColumnNames = () => {
