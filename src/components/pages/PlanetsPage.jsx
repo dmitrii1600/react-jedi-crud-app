@@ -14,9 +14,7 @@ function PlanetsPage({planets, setPlanets, isLoading, setIsLoading, storageKey})
         const getData = async () => {
             setIsLoading(true);
             const data = await getPlanets();
-            saveToLS(storageKey, data);
-            const storedData = getFromLS(storageKey);
-            setPlanets(storedData);
+            setPlanets(data);
             setIsLoading(false);
         };
 
@@ -38,9 +36,7 @@ function PlanetsPage({planets, setPlanets, isLoading, setIsLoading, storageKey})
 
     const handleDeletePlanet = (id) => {
         const filteredData = planets.filter(item => item.id !== id);
-        saveToLS(storageKey, filteredData);
-        const storedData = getFromLS(storageKey);
-        setPlanets(storedData);
+        setPlanets(filteredData);
     };
 
     const getColumnNames = () => {

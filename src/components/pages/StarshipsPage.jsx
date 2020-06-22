@@ -14,9 +14,7 @@ function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storag
         const getData = async () => {
             setIsLoading(true);
             const data = await getStarships();
-            saveToLS(storageKey, data);
-            const storedData = getFromLS(storageKey);
-            setStarships(storedData);
+            setStarships(data);
             setIsLoading(false);
         };
 
@@ -32,11 +30,13 @@ function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storag
         }
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, starships);
+    }, [starships]);
+
     const handleDeleteStarship = (id) => {
         const filteredData = starships.filter(item => item.id !== id);
-        saveToLS(storageKey, filteredData);
-        const storedData = getFromLS(storageKey);
-        setStarships(storedData);
+        setStarships(filteredData);
     };
 
     const getColumnNames = () => {

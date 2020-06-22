@@ -5,6 +5,9 @@ import {peopleColumns} from "../../services/swApiService";
 import {getFromLS, saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import {useDispatch, useSelector} from "react-redux";
+import {getAllPeople} from "../../store/selectors/people";
+import {addPerson, setPeople, updatePerson} from "../../store/actions/people";
 
 const validationRuleDefault = {required: true, maxLength: 50};
 
@@ -14,7 +17,10 @@ const initialPeopleData = peopleColumns.reduce((cols, columnName) => {
 }, {});
 
 
-const PeopleForm = ({people, setPeople, history, match, storageKey}) => {
+const PeopleForm = ({history, match, storageKey}) => {
+
+    const dispatch = useDispatch();
+    const people = useSelector(state => getAllPeople(state));
 
     const [data, setData] = useState({...initialPeopleData});
     const [editMode, setEditMode] = useState(false);
@@ -29,18 +35,18 @@ const PeopleForm = ({people, setPeople, history, match, storageKey}) => {
         setEditMode(true);
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, people);
+    }, [people]);
+
     const onSubmit = () => {
 
         if (editMode) {
-            const editedPeople = people.map(person => person.id === data.id ? data : person);
-            saveToLS(storageKey, editedPeople);
-            const storedData = getFromLS(storageKey);
-            setPeople(storedData);
+            //const editedPeople = people.map(person => person.id === data.id ? data : person);
+            dispatch(updatePerson(data));
         } else {
-            const newPeople = [...people, {...data, id: shortid.generate()}];
-            saveToLS(storageKey, newPeople);
-            const storedData = getFromLS(storageKey);
-            setPeople(storedData);
+            const newPerson = {...data, id: shortid.generate()};
+            dispatch(addPerson(newPerson));
             setData({...initialPeopleData});//clear form
         }
         history.push('/people');

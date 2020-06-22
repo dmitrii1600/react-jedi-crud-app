@@ -29,18 +29,18 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
         setEditMode(true);
     }, []);
 
+    useEffect(() => {
+        saveToLS(storageKey, starships);
+    }, [starships]);
+
     const onSubmit = () => {
 
         if (editMode) {
             const editedStarships = starships.map(person => person.id === data.id ? data : person);
-            saveToLS(storageKey, editedStarships);
-            const storedData = getFromLS(storageKey);
-            setStarships(storedData);
+            setStarships(editedStarships);
         } else {
             const newStarships = [...starships, {...data, id: shortid.generate()}];
-            saveToLS(storageKey, newStarships);
-            const storedData = getFromLS(storageKey);
-            setStarships(storedData);
+            setStarships(newStarships);
             setData({...initialStarshipsData});//clear form
         }
         history.push('/starships');
@@ -72,7 +72,7 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
                 <Button
                     type="submit"
                     label="Save"
-                    classes="btn btn-primary"
+                    classes="btn btn-success"
                 />
                 <Button
                     label="Back"
