@@ -6,6 +6,7 @@ export const peopleColumns = [
     'mass',
     'gender',
     'birth_year',
+    'beloved',
 ];
 
 export const planetsColumns = [
@@ -14,6 +15,7 @@ export const planetsColumns = [
     'rotation_period',
     'orbital_period',
     'gravity',
+    'beloved',
 ];
 
 export const starshipsColumns = [
@@ -21,6 +23,7 @@ export const starshipsColumns = [
     'model',
     'starship_class',
     'manufacturer',
+    'beloved',
 ];
 
 const url = 'https://swapi.dev/api';
@@ -30,7 +33,7 @@ export const getPeople = async () => {
 
     console.log(peopleResponse);
     return peopleResponse.results.map(({name, height, mass, gender, birth_year}) => ({
-        name, height, mass, gender, birth_year, id: shortid.generate(),
+        name, height, mass, gender, birth_year, beloved: false, id: shortid.generate(),
     }));
 };
 
@@ -39,7 +42,7 @@ export const getPlanets = async () => {
 
     console.log(planetsResponse);
     return planetsResponse.results.map(({name, diameter, rotation_period, orbital_period, gravity}) => ({
-        name, diameter, rotation_period, orbital_period, gravity, id: shortid.generate(),
+        name, diameter, rotation_period, orbital_period, gravity, beloved: false, id: shortid.generate(),
     }));
 };
 
@@ -48,7 +51,7 @@ export const getStarships = async () => {
 
     console.log(starshipsResponse);
     return starshipsResponse.results.map(({name, model, starship_class, manufacturer}) => ({
-        name, model, starship_class, manufacturer, id: shortid.generate(),
+        name, model, starship_class, manufacturer, beloved: false, id: shortid.generate(),
     }));
 };
 

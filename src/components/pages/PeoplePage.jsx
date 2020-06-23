@@ -1,17 +1,18 @@
 import React, {useEffect} from 'react';
 import {Link} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
 import Table from "../common/Table";
 import Title from "../common/Title";
-import {getPeople} from "../../services/swApiService";
-import {getFromLS, saveToLS} from "../../services/localStorageService";
 import Button from "../common/Button";
 import {Orbitals} from "react-spinners-css";
-import {useDispatch, useSelector} from "react-redux";
+import {getPeople} from "../../services/swApiService";
+import {getFromLS, saveToLS} from "../../services/localStorageService";
 import {getAllPeople} from "../../store/selectors/people";
-import {deletePerson, setPeople} from "../../store/actions/people";
+import {changeBelovedStatusPerson, deletePerson, setPeople} from "../../store/actions/people";
 
 
 function PeoplePage({isLoading, setIsLoading, storageKey}) {
+
     const dispatch = useDispatch();
     const people = useSelector(state => getAllPeople(state));
 
@@ -43,6 +44,10 @@ function PeoplePage({isLoading, setIsLoading, storageKey}) {
         dispatch(deletePerson(id));
     };
 
+    const handleBelovedStatus = (id) => {
+        dispatch(changeBelovedStatusPerson(id));
+    };
+
     const getColumnNames = () => {
         if (!people.length) {
             return []
@@ -56,6 +61,18 @@ function PeoplePage({isLoading, setIsLoading, storageKey}) {
                     colName,
                     content: ({name, id}) => (
                         <Link style={{color: '#f0ad4e'}} to={`/people/${id}`}>{name}</Link>
+                    )
+                }
+            }
+            if (colName === 'beloved') {
+                return {
+                    colName,
+                    content: ({beloved, id}) => (
+                        <input
+                            type="checkbox"
+                            checked={beloved}
+                            onChange={() => handleBelovedStatus(id)}
+                        />
                     )
                 }
             }

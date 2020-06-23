@@ -1,10 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import shortid from "short-id"
 import {useForm} from "react-hook-form";
-import {planetsColumns} from "../../services/swApiService";
-import {getFromLS, saveToLS} from "../../services/localStorageService";
+import {useDispatch, useSelector} from "react-redux";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import {planetsColumns} from "../../services/swApiService";
+import {saveToLS} from "../../services/localStorageService";
+import {getAllPlanets} from "../../store/selectors/planets";
+import {addPlanet, updatePlanet} from "../../store/actions/planets";
 
 
 const validationRuleDefault = {required: true, maxLength: 50};
@@ -15,7 +18,10 @@ const initialPlanetsData = planetsColumns.reduce((cols, columnName) => {
 }, {});
 
 
-const PlanetsForm = ({planets, setPlanets, history, match, storageKey}) => {
+const PlanetsForm = ({history, match, storageKey}) => {
+
+    const dispatch = useDispatch();
+    const planets = useSelector(state => getAllPlanets(state));
 
     const [data, setData] = useState({...initialPlanetsData});
     const [editMode, setEditMode] = useState(false);
@@ -36,11 +42,10 @@ const PlanetsForm = ({planets, setPlanets, history, match, storageKey}) => {
     const onSubmit = () => {
 
         if (editMode) {
-            const editedPlanets = planets.map(person => person.id === data.id ? data : person);
-            setPlanets(editedPlanets);
+            dispatch(updatePlanet(data));
         } else {
-            const newPeople = [...planets, {...data, id: shortid.generate()}];
-            setPlanets(newPeople);
+            const newPlanet = {...data, beloved: false, id: shortid.generate()};
+            dispatch(addPlanet(newPlanet));
             setData({...initialPlanetsData});//clear form
         }
         history.push('/planets');
@@ -57,7 +62,7 @@ const PlanetsForm = ({planets, setPlanets, history, match, storageKey}) => {
         <div className="container pt-5">
             <form onSubmit={handleSubmit(onSubmit)}>
                 {planetsColumns.map(columnName => (
-                    <Input
+                    columnName !== 'beloved' && <Input
                         key={columnName}
                         name={columnName}
                         label={columnName}

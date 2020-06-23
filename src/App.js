@@ -18,9 +18,6 @@ function App() {
     const storageKeyPlanets = 'planets';
     const storageKeyStarships = 'starships';
 
-    //const [people, setPeople] = useState([]);
-    const [planets, setPlanets] = useState([]);
-    const [starships, setStarships] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
 
     return (
@@ -35,22 +32,18 @@ function App() {
                                 isLoading={isLoading}
                                 setIsLoading={setIsLoading}/>}/>
                 <Route path="/planets/:id" render={props =>
-                    <PlanetsForm {...props} setPlanets={setPlanets} planets={planets}
+                    <PlanetsForm {...props}
                                  storageKey={storageKeyPlanets}/>}/>
                 <Route path="/planets" render={props =>
                     <PlanetsPage {...props}
-                                 setPlanets={setPlanets}
-                                 planets={planets}
                                  storageKey={storageKeyPlanets}
                                  isLoading={isLoading}
                                  setIsLoading={setIsLoading}/>}/>
                 <Route path="/starships/:id" render={props =>
-                    <StarshipsForm {...props} setStarships={setStarships} starships={starships}
+                    <StarshipsForm {...props}
                                    storageKey={storageKeyStarships}/>}/>
                 <Route path="/starships" render={props =>
                     <StarshipsPage {...props}
-                                   setStarships={setStarships}
-                                   starships={starships}
                                    storageKey={storageKeyStarships}
                                    isLoading={isLoading}
                                    setIsLoading={setIsLoading}/>}/>

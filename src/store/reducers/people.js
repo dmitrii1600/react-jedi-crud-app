@@ -1,4 +1,4 @@
-import {SET_PEOPLE, DELETE_PERSON, CHANGE_BELOVED_STATUS, ADD_PERSON, UPDATE_PERSON} from '../actions/people'
+import {SET_PEOPLE, DELETE_PERSON, CHANGE_BELOVED_STATUS_PERSON, ADD_PERSON, UPDATE_PERSON} from '../actions/people'
 
 
 const initialState = {
@@ -29,7 +29,7 @@ function people(state = initialState, action) {
                     return person.id === action.newData.id ? action.newData : person
                 })
             };
-        case CHANGE_BELOVED_STATUS:
+        case CHANGE_BELOVED_STATUS_PERSON:
             return {
                 ...state,
                 allPeople: state.allPeople.map((person) => {

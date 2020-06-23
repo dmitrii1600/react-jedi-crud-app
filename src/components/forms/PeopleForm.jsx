@@ -1,13 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import shortid from "short-id"
 import {useForm} from "react-hook-form";
-import {peopleColumns} from "../../services/swApiService";
-import {getFromLS, saveToLS} from "../../services/localStorageService";
+import {useDispatch, useSelector} from "react-redux";
 import Button from "../common/Button";
 import Input from "../common/Input";
-import {useDispatch, useSelector} from "react-redux";
+import {peopleColumns} from "../../services/swApiService";
+import {saveToLS} from "../../services/localStorageService";
 import {getAllPeople} from "../../store/selectors/people";
-import {addPerson, setPeople, updatePerson} from "../../store/actions/people";
+import {addPerson, updatePerson} from "../../store/actions/people";
 
 const validationRuleDefault = {required: true, maxLength: 50};
 
@@ -42,10 +42,9 @@ const PeopleForm = ({history, match, storageKey}) => {
     const onSubmit = () => {
 
         if (editMode) {
-            //const editedPeople = people.map(person => person.id === data.id ? data : person);
             dispatch(updatePerson(data));
         } else {
-            const newPerson = {...data, id: shortid.generate()};
+            const newPerson = {...data, beloved: false, id: shortid.generate()};
             dispatch(addPerson(newPerson));
             setData({...initialPeopleData});//clear form
         }
@@ -63,12 +62,12 @@ const PeopleForm = ({history, match, storageKey}) => {
         <div className="container pt-5">
             <form onSubmit={handleSubmit(onSubmit)}>
                 {peopleColumns.map(columnName => (
-                    <Input
+                    columnName !== 'beloved' && <Input
                         key={columnName}
                         name={columnName}
                         label={columnName}
                         value={data[columnName]}
-                        type="input"
+                        type={'input'}
                         onChange={handleChange}
                         refer={columnName === 'mass' || columnName === 'height' ? register({
                             ...validationRuleDefault,

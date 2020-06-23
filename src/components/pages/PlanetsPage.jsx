@@ -1,20 +1,26 @@
 import React, {useEffect} from 'react';
+import {Link} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
 import Table from "../common/Table";
 import Title from "../common/Title";
+import Button from "../common/Button";
+import {Orbitals} from "react-spinners-css";
 import {getPlanets} from "../../services/swApiService";
 import {getFromLS, saveToLS} from "../../services/localStorageService";
-import Button from "../common/Button";
-import {Link} from "react-router-dom";
-import {Orbitals} from "react-spinners-css";
+import {getAllPlanets} from "../../store/selectors/planets";
+import {changeBelovedStatusPlanet, deletePlanet, setPlanets} from "../../store/actions/planets";
 
 
-function PlanetsPage({planets, setPlanets, isLoading, setIsLoading, storageKey}) {
+function PlanetsPage({isLoading, setIsLoading, storageKey}) {
+
+    const dispatch = useDispatch();
+    const planets = useSelector(state => getAllPlanets(state));
 
     useEffect(() => {
         const getData = async () => {
             setIsLoading(true);
             const data = await getPlanets();
-            setPlanets(data);
+            dispatch(setPlanets(data));
             setIsLoading(false);
         };
 
@@ -26,7 +32,7 @@ function PlanetsPage({planets, setPlanets, isLoading, setIsLoading, storageKey})
             getData();
         } else {
             const storedData = getFromLS(storageKey);
-            setPlanets(storedData);
+            dispatch(setPlanets(storedData));
         }
     }, []);
 
@@ -35,8 +41,11 @@ function PlanetsPage({planets, setPlanets, isLoading, setIsLoading, storageKey})
     }, [planets]);
 
     const handleDeletePlanet = (id) => {
-        const filteredData = planets.filter(item => item.id !== id);
-        setPlanets(filteredData);
+        dispatch(deletePlanet(id));
+    };
+
+    const handleBelovedStatus = (id) => {
+        dispatch(changeBelovedStatusPlanet(id));
     };
 
     const getColumnNames = () => {
@@ -52,6 +61,18 @@ function PlanetsPage({planets, setPlanets, isLoading, setIsLoading, storageKey})
                     colName,
                     content: ({name, id}) => (
                         <Link style={{color: '#f0ad4e'}} to={`/planets/${id}`}>{name}</Link>
+                    )
+                }
+            }
+            if (colName === 'beloved') {
+                return {
+                    colName,
+                    content: ({beloved, id}) => (
+                        <input
+                            type="checkbox"
+                            checked={beloved}
+                            onChange={() => handleBelovedStatus(id)}
+                        />
                     )
                 }
             }

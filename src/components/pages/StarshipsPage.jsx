@@ -1,20 +1,26 @@
 import React, {useEffect} from 'react';
+import {Link} from "react-router-dom";
+import {useDispatch, useSelector} from "react-redux";
 import Table from "../common/Table";
 import Title from "../common/Title";
+import Button from "../common/Button";
+import {Orbitals} from "react-spinners-css";
 import {getStarships} from "../../services/swApiService";
 import {getFromLS, saveToLS} from "../../services/localStorageService";
-import Button from "../common/Button";
-import {Link} from "react-router-dom";
-import {Orbitals} from "react-spinners-css";
+import {getAllStarships} from "../../store/selectors/starships";
+import {changeBelovedStatusStarship, deleteStarship, setStarships} from "../../store/actions/starships";
 
 
-function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storageKey}) {
+function StarshipsPage({isLoading, setIsLoading, storageKey}) {
+
+    const dispatch = useDispatch();
+    const starships = useSelector(state => getAllStarships(state));
 
     useEffect(() => {
         const getData = async () => {
             setIsLoading(true);
             const data = await getStarships();
-            setStarships(data);
+            dispatch(setStarships(data));
             setIsLoading(false);
         };
 
@@ -26,7 +32,7 @@ function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storag
             getData();
         } else {
             const storedData = getFromLS(storageKey);
-            setStarships(storedData);
+            dispatch(setStarships(storedData));
         }
     }, []);
 
@@ -35,8 +41,11 @@ function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storag
     }, [starships]);
 
     const handleDeleteStarship = (id) => {
-        const filteredData = starships.filter(item => item.id !== id);
-        setStarships(filteredData);
+        dispatch(deleteStarship(id));
+    };
+
+    const handleBelovedStatus = (id) => {
+        dispatch(changeBelovedStatusStarship(id));
     };
 
     const getColumnNames = () => {
@@ -52,6 +61,18 @@ function StarshipsPage({starships, setStarships, isLoading, setIsLoading, storag
                     colName,
                     content: ({name, id}) => (
                         <Link style={{color: '#f0ad4e'}} to={`/starships/${id}`}>{name}</Link>
+                    )
+                }
+            }
+            if (colName === 'beloved') {
+                return {
+                    colName,
+                    content: ({beloved, id}) => (
+                        <input
+                            type="checkbox"
+                            checked={beloved}
+                            onChange={() => handleBelovedStatus(id)}
+                        />
                     )
                 }
             }

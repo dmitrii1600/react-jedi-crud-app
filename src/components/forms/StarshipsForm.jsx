@@ -1,10 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import shortid from "short-id"
 import {useForm} from "react-hook-form";
-import {starshipsColumns} from "../../services/swApiService";
-import {getFromLS, saveToLS} from "../../services/localStorageService";
+import {useDispatch, useSelector} from "react-redux";
 import Button from "../common/Button";
 import Input from "../common/Input";
+import {starshipsColumns} from "../../services/swApiService";
+import {saveToLS} from "../../services/localStorageService";
+import {getAllStarships} from "../../store/selectors/starships";
+import {addStarship, updateStarship} from "../../store/actions/starships";
 
 
 const validationRuleDefault = {required: true, maxLength: 50};
@@ -15,7 +18,10 @@ const initialStarshipsData = starshipsColumns.reduce((cols, columnName) => {
 }, {});
 
 
-const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
+const StarshipsForm = ({history, match, storageKey}) => {
+
+    const dispatch = useDispatch();
+    const starships = useSelector(state => getAllStarships(state));
 
     const [data, setData] = useState({...initialStarshipsData});
     const [editMode, setEditMode] = useState(false);
@@ -36,11 +42,10 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
     const onSubmit = () => {
 
         if (editMode) {
-            const editedStarships = starships.map(person => person.id === data.id ? data : person);
-            setStarships(editedStarships);
+            dispatch(updateStarship(data))
         } else {
-            const newStarships = [...starships, {...data, id: shortid.generate()}];
-            setStarships(newStarships);
+            const newStarship = {...data, beloved: false, id: shortid.generate()};
+            dispatch(addStarship(newStarship));
             setData({...initialStarshipsData});//clear form
         }
         history.push('/starships');
@@ -57,7 +62,7 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
         <div className="container pt-5">
             <form onSubmit={handleSubmit(onSubmit)}>
                 {starshipsColumns.map(columnName => (
-                    <Input
+                    columnName !== 'beloved' && <Input
                         key={columnName}
                         name={columnName}
                         label={columnName}
@@ -84,4 +89,4 @@ const PeopleForm = ({starships, setStarships, history, match, storageKey}) => {
     );
 };
 
-export default PeopleForm;
+export default StarshipsForm;
